@@ -1,0 +1,387 @@
+openapi: 3.0.3
+info:
+  title: POS Receipt System API
+  version: 1.0.1
+  description: API for a small business POS system with tax calculation and PDF receipt generation.
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Auth
+    description: Authentication endpoints
+  - name: Products
+    description: Product management
+  - name: Sales
+    description: Sales and receipts
+  - name: Settings
+    description: Business information configuration
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register the business owner account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "201":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Authenticate and return JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Authenticated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+
+  /products:
+    post:
+      tags: [Products]
+      summary: Add a new product
+#      security:
+#        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Product"
+      responses:
+        "201":
+          description: Product created
+    get:
+      tags: [Products]
+      summary: List all products
+#      security:
+#        - bearerAuth: []
+      parameters:
+        - in: query
+          name: name
+          required: false
+          description: Search products by name (partial match allowed)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /products/{id}:
+    put:
+      tags: [Products]
+      summary: Update a product
+#      security:
+#        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Product"
+      responses:
+        "200":
+          description: Product updated
+    delete:
+      tags: [Products]
+      summary: Delete a product
+#      security:
+#        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Product deleted
+
+  /sales:
+    post:
+      tags: [Sales]
+      summary: Create a new sale
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      productId:
+                        type: integer
+                      quantity:
+                        type: integer
+      responses:
+        "201":
+          description: Sale created with totals
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sale"
+    get:
+      tags: [Sales]
+      summary: List all sales
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of sales
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Sale"
+
+  /sales/{id}:
+    put:
+      tags: [Sales]
+      summary: Update a sale
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      productId:
+                        type: integer
+                      quantity:
+                        type: integer
+      responses:
+        "200":
+          description: Sale updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sale"
+
+    delete:
+      tags: [Sales]
+      summary: Delete a sale
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Sale deleted successfully
+
+  /sales/{id}/receipt:
+    get:
+      tags: [Sales]
+      summary: Generate and download PDF receipt
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: PDF receipt
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+
+  /settings:
+    get:
+      tags: [Settings]
+      summary: Get business information
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Business settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Settings"
+    put:
+      tags: [Settings]
+      summary: Update business information
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Settings"
+      responses:
+        "200":
+          description: Settings updated
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        price:
+          type: number
+          format: float
+        cgstRate:
+          type: number
+          format: float
+          description: "Central GST rate (%)"
+        sgstRate:
+          type: number
+          format: float
+          description: "State GST rate (%)"
+        description:
+          type: string
+
+    Sale:
+      type: object
+      properties:
+        id:
+          type: integer
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: integer
+              quantity:
+                type: integer
+              unitPrice:
+                type: number
+                format: float
+              cgstRate:
+                type: number
+                format: float
+                description: "Central GST rate (%)"
+              sgstRate:
+                type: number
+                format: float
+                description: "State GST rate (%)"
+              cgstAmount:
+                type: number
+                format: float
+              sgstAmount:
+                type: number
+                format: float
+              lineTotal:
+                type: number
+                format: float
+              subtotal:
+                type: number
+                format: float
+              cgstTotal:
+                type: number
+                format: float
+              sgstTotal:
+                type: number
+                format: float
+              taxTotal:
+                type: number
+                format: float
+              grandTotal:
+                type: number
+                format: float
+              createdAt:
+                type: string
+                format: date-time
+
+
+    Settings:
+      type: object
+      properties:
+        businessName:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        defaultTaxRate:
+          type: number
+          format: float
