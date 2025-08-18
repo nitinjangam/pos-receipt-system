@@ -13,7 +13,14 @@ export interface Product {
     id?: number;
     name?: string;
     price?: number;
-    taxRate?: number;
+    /**
+     * Central GST rate (%)
+     */
+    cgstRate?: number;
+    /**
+     * State GST rate (%)
+     */
+    sgstRate?: number;
     description?: string;
 }
 

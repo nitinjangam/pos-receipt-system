@@ -2,7 +2,6 @@ export * from './authLoginPost200Response';
 export * from './authRegisterPost201Response';
 export * from './authRegisterPostRequest';
 export * from './product';
-export * from './productsPostRequest';
 export * from './sale';
 export * from './saleItemsInner';
 export * from './salesPostRequest';

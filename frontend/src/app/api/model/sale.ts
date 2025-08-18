@@ -13,9 +13,5 @@ import { SaleItemsInner } from './saleItemsInner';
 export interface Sale { 
     id?: number;
     items?: Array<SaleItemsInner>;
-    subtotal?: number;
-    taxTotal?: number;
-    grandTotal?: number;
-    createdAt?: string;
 }
 

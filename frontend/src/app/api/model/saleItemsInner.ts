@@ -13,8 +13,22 @@ export interface SaleItemsInner {
     productId?: number;
     quantity?: number;
     unitPrice?: number;
-    taxRate?: number;
-    taxAmount?: number;
+    /**
+     * Central GST rate (%)
+     */
+    cgstRate?: number;
+    /**
+     * State GST rate (%)
+     */
+    sgstRate?: number;
+    cgstAmount?: number;
+    sgstAmount?: number;
     lineTotal?: number;
+    subtotal?: number;
+    cgstTotal?: number;
+    sgstTotal?: number;
+    taxTotal?: number;
+    grandTotal?: number;
+    createdAt?: string;
 }
 

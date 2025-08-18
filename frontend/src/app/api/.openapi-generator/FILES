@@ -1,5 +1,4 @@
 .gitignore
-.openapi-generator-ignore
 README.md
 api.base.service.ts
 api.module.ts
@@ -17,7 +16,6 @@ model/authRegisterPost201Response.ts
 model/authRegisterPostRequest.ts
 model/models.ts
 model/product.ts
-model/productsPostRequest.ts
 model/sale.ts
 model/saleItemsInner.ts
 model/salesPostRequest.ts
